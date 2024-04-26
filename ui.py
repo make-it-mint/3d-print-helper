@@ -1,9 +1,8 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
-import math, sys
+import math, sys, os
 import re
 import subprocess
 from settings import *
-from serial.tools.list_ports import comports as list_comports
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -35,9 +34,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.txt_filepath.setFont(BASIC_FONT_MID)
         self.txt_filepath.setReadOnly(True)
 
-        self.bt_search_usb = QtWidgets.QPushButton("USB Stick suchen")
-        self.bt_search_usb.setFont(BASIC_FONT_LARGE)
-        self.bt_search_usb.clicked.connect(self.find_usb_drive)
 
         bt_slice = QtWidgets.QPushButton("SLICEN")
         bt_slice.setFont(BASIC_FONT_LARGE)
@@ -54,7 +50,6 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.cb_profile)
         layout.addWidget(bt_filepath)
         layout.addWidget(self.txt_filepath)
-        layout.addWidget(self.bt_search_usb)
         layout.addWidget(bt_slice)
         layout.addWidget(bt_exe_path)
         layout.addWidget(bt_close)
@@ -68,12 +63,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def start_slicing(self):
         save_path = QtWidgets.QFileDialog.getSaveFileName(self, 'GCode Speichern',filter="(*.gcode)")
         print(save_path[0])
+        path = "C:/\"Program Files\"/Prusa3D/PrusaSlicer/prusa-slicer-console.exe"
+        my_file = "C:\\Users\\felix\\Desktop\\test.stl"
+        saved = "C:\\Users\\felix\\Desktop\\result.gcode"
         #TODO Slice bash command
+        #os.system(f"prusa-slicer-console.exe -g {my_file}")
+        os.system(f"{path} -g -o {save_path[0]} {my_file}")
 
-
-    def find_usb_drive(self):
-        comports = [comport.device for comport in list_comports()]
-        print(comports)
 
     def get_slicer_path(self):
         f = open("slicerpath.txt", "r")
