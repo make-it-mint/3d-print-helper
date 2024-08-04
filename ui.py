@@ -1,14 +1,15 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
-import math, sys, os
-import re
-import subprocess
+import math, sys, os, time, winsound
 from settings import *
+from os import listdir
+from os.path import isfile, join
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
         self.slicer_path = self.get_slicer_path()
+    
 
         self.setWindowTitle("My App")
         self.resize(500,400)
@@ -21,14 +22,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.cb_profile = QtWidgets.QComboBox()
         self.cb_profile.setFont(BASIC_FONT_LARGE)
-        self.cb_profile.addItem("Prusa Mini")
-        self.cb_profile.addItem("Prusa MK3")
-        self.cb_profile.addItem("Prusa MK4")
+        config_files = [f for f in listdir("config_files/") if isfile(join("config_files/", f))]
+        for file in config_files:
+            self.cb_profile.addItem(file)
+
 
 
         bt_filepath = QtWidgets.QPushButton("Dateipfad auswählen")
         bt_filepath.setFont(BASIC_FONT_LARGE)
         bt_filepath.clicked.connect(self.select_file)
+        self.print_file_stl = None
 
         self.txt_filepath = QtWidgets.QTextEdit("Keine Datei ausgewählt")
         self.txt_filepath.setFont(BASIC_FONT_MID)
@@ -60,32 +63,68 @@ class MainWindow(QtWidgets.QMainWindow):
         self.show()
 
 
+    def beep(self, success):
+        #einfacher Beep für Erfolg, doppelter Beep für Fehler
+        duration = 300  # milliseconds
+        freq = 440
+        if success:
+            winsound.Beep(freq, duration)
+        else:
+            winsound.Beep(freq, duration)
+            time.sleep(.3)
+            winsound.Beep(freq, duration)
+        
     def start_slicing(self):
+        if self.print_file_stl == None:
+            self.beep(False)
+            return False
         save_path = QtWidgets.QFileDialog.getSaveFileName(self, 'GCode Speichern',filter="(*.gcode)")
-        print(save_path[0])
-        path = "C:/\"Program Files\"/Prusa3D/PrusaSlicer/prusa-slicer-console.exe"
-        my_file = "C:\\Users\\felix\\Desktop\\test.stl"
-        saved = "C:\\Users\\felix\\Desktop\\result.gcode"
-        #TODO Slice bash command
-        #os.system(f"prusa-slicer-console.exe -g {my_file}")
-        os.system(f"{path} -g -o {save_path[0]} {my_file}")
+        try:
+            os.system(f"{self.get_slicer_path()} -g  {self.print_file_stl} -o {save_path[0]} --load config_files/{self.cb_profile.currentText()}")
+            self.beep(True)
+        except Exception as e:
+            self.beep(False)
+            print(e)
 
 
     def get_slicer_path(self):
         f = open("slicerpath.txt", "r")
         return f.read()
+    
+    def refactor_path(self, path):
+        #cmd kann nicht mit Leerzeichen in Dateipfaden umgehen, deswegen werden die Pfade mit Leerzeichen korrigiert
+        path = path.split("/")
+        new_path = ''
+        for directory in path:
+            if ' ' in directory:
+                new_path = f'{new_path}/"{directory}"'
+            else:
+                if len(new_path) == 0:
+                    new_path  = f'{directory}'
+                else:
+                    new_path  = f'{new_path}/{directory}'
+        return new_path
 
     def set_slicer_path(self): 
         dialog = QtWidgets.QFileDialog.getOpenFileName(self, "Slicerpfad auswählen", filter="EXE (*.exe)")
-        f = open("slicerpath.txt", "w")
-        f.write(dialog[0])
-        f.close()
-        self.slicer_path = dialog[0]
+        if dialog[0].endswith("prusa-slicer-console.exe"):
+            path = self.refactor_path(dialog[0])
+            f = open("slicerpath.txt", "w")
+            f.write(path)
+            f.close()
+            self.slicer_path = path
+            self.beep(True)
+        else:
+            self.beep(False)
 
     def select_file(self):
-        dialog = QtWidgets.QFileDialog.getOpenFileName(self, "Dateipfad auswählen", filter="3D Models (*.stl)")
-        #print(dialog)
-        self.txt_filepath.setText(dialog[0])
+        print_file = QtWidgets.QFileDialog.getOpenFileName(self, "Dateipfad auswählen", filter="3D Models (*.stl)")
+        if print_file[0].endswith(".stl"):
+            self.print_file_stl = self.refactor_path(print_file[0])
+            self.txt_filepath.setText(print_file[0])
+            self.beep(True)
+        else:
+            self.beep(False)
 
     def close(self):
         sys.exit()
