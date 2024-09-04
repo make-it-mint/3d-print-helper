@@ -11,7 +11,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.slicer_path = self.get_slicer_path()
     
 
-        self.setWindowTitle("My App")
+        self.setWindowTitle("3DPrintHelper")
         self.resize(500,400)
 
         layout = QtWidgets.QVBoxLayout()
@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.txt_filepath.setReadOnly(True)
 
 
-        bt_slice = QtWidgets.QPushButton("SLICEN")
+        bt_slice = QtWidgets.QPushButton("Slicen")
         bt_slice.setFont(BASIC_FONT_LARGE)
         bt_slice.clicked.connect(self.start_slicing)
 
