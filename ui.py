@@ -45,19 +45,19 @@ class MainWindow(QtWidgets.QMainWindow):
         #Transformationen
         #scale
         self.tb_scale = QtWidgets.QLineEdit()
-        self.tb_scale.setPlaceholderText("Skalierung des Modells in Prozent")
+        self.tb_scale.setText("Skalierung des Modells in Prozent")
         self.tb_scale.setFont(BASIC_FONT_LARGE)
         #rotate z
         self.tb_rotate_z = QtWidgets.QLineEdit()
-        self.tb_rotate_z.setPlaceholderText("Rotation um Z Achse in Grad")
+        self.tb_rotate_z.setText("Rotation um Z Achse in Grad")
         self.tb_rotate_z.setFont(BASIC_FONT_LARGE)
         #rotate y
         self.tb_rotate_y = QtWidgets.QLineEdit()
-        self.tb_rotate_y.setPlaceholderText("Rotation um Y Achse in Grad")
+        self.tb_rotate_y.setText("Rotation um Y Achse in Grad")
         self.tb_rotate_y.setFont(BASIC_FONT_LARGE)
         #rotate x
         self.tb_rotate_x = QtWidgets.QLineEdit()
-        self.tb_rotate_x.setPlaceholderText("Rotation um X Achse in Grad")
+        self.tb_rotate_x.setText("Rotation um X Achse in Grad")
         self.tb_rotate_x.setFont(BASIC_FONT_LARGE)
 
         #Settings
@@ -130,7 +130,7 @@ class MainWindow(QtWidgets.QMainWindow):
             return False
         save_path = QtWidgets.QFileDialog.getSaveFileName(self, 'GCode Speichern',filter="(*.gcode)")
         try:
-            os.system(f"{self.get_slicer_path()} -g  {self.print_file_stl} --scale {self.get_scale_value()}% --rotate {self.get_rotation_value("z")} --rotate-y {self.get_rotation_value("y")} --rotate-x {self.get_rotation_value("x")} -o {save_path[0]} --load config_files/{self.cb_profile.currentText()} --info")
+            os.system(f"{self.get_slicer_path()} -g  {self.print_file_stl} --scale {self.get_scale_value()}% --rotate {self.get_rotation_value("z")} --rotate-y {self.get_rotation_value("y")} --rotate-x {self.get_rotation_value("x")} -o {save_path[0]} --load config_files/{self.cb_profile.currentText()}")
             self.beep(True)
         except Exception as e:
             self.beep(False)
