@@ -132,9 +132,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		save_path = QtWidgets.QFileDialog.getSaveFileName(
 			self, "GCode Speichern", filter="(*.gcode)"
 		)
+		save_path = self.refactor_path(save_path[0])
 		try:
 			os.system(
-				f"{self.get_slicer_path()} -g  {self.print_file_stl} --scale {self.get_scale_value()}% --rotate {self.get_rotation_value('z')} --rotate-y {self.get_rotation_value('y')} --rotate-x {self.get_rotation_value('x')} -o {save_path[0]} --load config_files/{self.cb_profile.currentText()}"
+				f"{self.get_slicer_path()} -g  {self.print_file_stl} --scale {self.get_scale_value()}% --rotate {self.get_rotation_value('z')} --rotate-y {self.get_rotation_value('y')} --rotate-x {self.get_rotation_value('x')} -o {save_path} --load config_files/{self.cb_profile.currentText()}"
 			)
 			self.beep(True)
 		except Exception as e:
